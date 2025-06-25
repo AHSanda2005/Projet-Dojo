@@ -53,10 +53,9 @@ CREATE TABLE parent_eleve (
 
 -- Matériel et suivi
 CREATE TABLE materiel (
-  id_materiel SERIAL,
-  reference_materiel INTEGER UNIQUE,
+  reference_materiel INTEGER PRIMARY KEY,
   label VARCHAR,
-  PRIMARY KEY (id_materiel, reference_materiel)
+  id_materiel SERIAL UNIQUE
 );
 
 CREATE TABLE stock_materiel (
@@ -161,3 +160,4 @@ CREATE TABLE abonnement (
   mois INTEGER,
   actif BOOLEAN
 );
+
