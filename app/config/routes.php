@@ -1,10 +1,9 @@
 <?php
 
 //importation de controller
-use app\controllers\AuthController;
 use app\controllers\Controller;
-use app\controllers\EnregistrementController;
-use app\controllers\CrudController;
+use app\controllers\GroupeControllers\GroupeController;
+use app\controllers\GroupeControllers\ReservationController;
 
 //importation lié flight
 use flight\Engine;
@@ -22,7 +21,22 @@ use flight\net\Router;
 });*/
 
 $Controller = new Controller();
+$GroupeController = new GroupeController();
+$ReservationController = new ReservationController();
+
 $router->get('/', [ $Controller, 'acceuil' ]);
+
+$router->get('/groupes', [ $GroupeController, 'GetAllGroupes' ]);
+$router->get('/groupe/@id:[0-9]+', [ $GroupeController, 'GetGroupeById' ]);
+$router->post('/groupe/insert', [ $GroupeController, 'InsertGroupe' ]);
+$router->post('/groupe/update/@id:[0-9]+', [ $GroupeController, 'UpdateGroupe' ]);
+$router->get('/groupe/delete/@id:[0-9]+', [ $GroupeController, 'DeleteGroupe' ]);
+
+$router->get('/reservations', [ $ReservationController, 'GetAllReservations' ]);
+$router->get('/reservation/@id:[0-9]+', [ $ReservationController, 'GetReservationById' ]);
+$router->post('/reservation/insert', [ $ReservationController, 'InsertReservation' ]);
+$router->post('/reservation/update/@id:[0-9]+', [ $ReservationController, 'UpdateReservation' ]);
+$router->get('/reservation/delete/@id:[0-9]+', [ $ReservationController, 'DeleteReservation' ]);
 
 // $router->get('/', \app\controllers\WelcomeController::class.'->home'); 
 
