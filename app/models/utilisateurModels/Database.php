@@ -13,7 +13,6 @@ class Database {
     }
 
     public function testConnection() {
-        // Vérifier les drivers disponibles
         $availableDrivers = PDO::getAvailableDrivers();
         
         if (!in_array($this->config['driver'], $availableDrivers)) {
@@ -43,7 +42,6 @@ class Database {
                 ]
             );
 
-            // Test simple query selon le type de base
             if ($this->config['driver'] === 'pgsql') {
                 $stmt = $pdo->query("SELECT version() as version");
             } else {
