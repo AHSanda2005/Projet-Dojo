@@ -51,20 +51,100 @@ CREATE TABLE parent_eleve (
   id_eleve INTEGER REFERENCES eleve(id_eleve)
 );
 
--- Matériel et suivi
-CREATE TABLE materiel (
-  id_materiel SERIAL,
-  reference_materiel INTEGER UNIQUE,
-  label VARCHAR,
-  PRIMARY KEY (id_materiel, reference_materiel)
+
+
+-- Matériel et suivi : Dylan modification (28-06-25)
+
+CREATE TABLE materiel_type (
+   id_type     SERIAL PRIMARY KEY,
+   reference   VARCHAR(50) UNIQUE NOT NULL,
+   label       VARCHAR(255) NOT NULL,
+   description TEXT
+);
+
+ALTER TABLE materiel_type
+    ADD COLUMN prix NUMERIC(10,2) DEFAULT 0; -- Dylan modification (29-06-25)
+
+
+CREATE TABLE materiel_item (
+   id_item    SERIAL PRIMARY KEY,
+   id_type    INTEGER NOT NULL
+       REFERENCES materiel_type(id_type)
+           ON DELETE CASCADE,
+   num_serie  VARCHAR(100) UNIQUE,
+   etat       etat NOT NULL DEFAULT 'neuve'
 );
 
 CREATE TABLE stock_materiel (
-  id_suivi_materiel SERIAL PRIMARY KEY,
-  id_materiel INTEGER REFERENCES materiel(id_materiel),
-  quantite INTEGER,
-  date TIMESTAMP
+    id_suivi        SERIAL PRIMARY KEY,
+    id_type         INTEGER NOT NULL
+        REFERENCES materiel_type(id_type)
+            ON DELETE RESTRICT,
+    type_mouvement  CHAR(1) NOT NULL             -- 'I' pour entrée, 'O' pour sortie
+        CHECK (type_mouvement IN ('I','O')),
+    quantite        INTEGER NOT NULL CHECK (quantite > 0),
+    date            TIMESTAMP NOT NULL DEFAULT now()
 );
+
+CREATE TYPE etat_suivi AS ENUM ('disponible','endommage');
+
+CREATE TABLE suivi_salle (
+     id_suivi_salle SERIAL PRIMARY KEY,
+     id_superviseur   INTEGER NOT NULL
+         REFERENCES superviseur(id_superviseur)
+             ON DELETE RESTRICT,
+     id_item          INTEGER NOT NULL
+         REFERENCES materiel_item(id_item)
+             ON DELETE CASCADE,
+     date             TIMESTAMP NOT NULL DEFAULT now(),
+     description      TEXT,
+     etat             etat_suivi NOT NULL DEFAULT 'disponible'
+);
+ALTER TABLE suivi_salle ADD COLUMN id_club INTEGER REFERENCES club_groupe(id); --Dylan modification (29-06-25)
+
+
+CREATE TABLE facture_materiel (
+      id_facture SERIAL PRIMARY KEY,
+      id_suivi_salle INTEGER REFERENCES suivi_salle(id_suivi_salle) UNIQUE,
+      date TIMESTAMP DEFAULT NOW(),
+      destinataire VARCHAR(255),  -- nom club ou superviseur
+      montant NUMERIC(10,2)
+);
+ALTER TABLE facture_materiel ADD COLUMN est_paye BOOLEAN DEFAULT FALSE;
+
+
+SELECT mi.*
+FROM materiel_item mi
+WHERE mi.id_type = 1
+  AND NOT EXISTS (
+    SELECT 1 FROM stock_materiel sm
+    WHERE sm.id_type = 1
+      AND sm.type_mouvement = 'O'
+      AND sm.quantite >= (
+        SELECT COUNT(*) FROM materiel_item
+        WHERE id_type = 1
+    )
+);
+
+SELECT * FROM materiel_item
+WHERE id_type = 1
+  AND etat = 'neuve';
+
+INSERT INTO club_groupe (nom_responsable, contact, nombre)
+VALUES ('Rakoto Jean', '0341234567', 15);
+
+INSERT INTO club_groupe (nom_responsable, contact, nombre)
+VALUES ('Rasolonjatovo Lova', '0339876543', 10);
+
+UPDATE materiel_type
+SET prix = 45000.00
+WHERE id_type = 1;
+
+INSERT INTO materiel_type (reference, label, description, prix)
+VALUES ('TAP-001', 'Tapis de sol', 'Tapis antidérapant pour arts martiaux', 35000.00);
+
+
+-- Dylan modification (28-06-25)
 
 CREATE TABLE historique_garde (
   id_historique SERIAL PRIMARY KEY,
@@ -73,12 +153,6 @@ CREATE TABLE historique_garde (
   heure TIMESTAMP
 );
 
-CREATE TABLE suivi_salle (
-  id_superviseur INTEGER REFERENCES superviseur(id_superviseur),
-  description TEXT,
-  reference_materiel INTEGER REFERENCES materiel(reference_materiel),
-  etat etat
-);
 
 -- Cours
 CREATE TABLE cours (
