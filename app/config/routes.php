@@ -1,7 +1,6 @@
 <?php
 
 //importation de controller
-use app\controllers\Controller;
 use app\controllers\GroupeControllers\GroupeController;
 use app\controllers\GroupeControllers\ReservationController;
 
@@ -20,11 +19,8 @@ use flight\net\Router;
 	$app->render('welcome', [ 'message' => 'It works!!' ]);
 });*/
 
-$Controller = new Controller();
 $GroupeController = new GroupeController();
 $ReservationController = new ReservationController();
-
-$router->get('/', [ $Controller, 'acceuil' ]);
 
 $router->get('/groupes', [ $GroupeController, 'GetAllGroupes' ]);
 $router->get('/groupe/@id:[0-9]+', [ $GroupeController, 'GetGroupeById' ]);

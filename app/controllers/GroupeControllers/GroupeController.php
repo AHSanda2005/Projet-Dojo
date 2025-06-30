@@ -5,7 +5,7 @@ namespace app\controllers\GroupeControllers;
 use app\models\GroupeModels\GroupeModel;
 use Flight;
 
-class Controller {
+class GroupeController {
 
     public function InsertGroupe() {
         $nom_responsable = Flight::request()->data->nom_responsable;
