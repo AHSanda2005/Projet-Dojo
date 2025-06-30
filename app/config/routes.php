@@ -22,14 +22,17 @@ use flight\net\Router;
 $GroupeController = new GroupeController();
 $ReservationController = new ReservationController();
 
+$router->get('/', [ $GroupeController, 'formGroupe' ]);
 $router->get('/groupes', [ $GroupeController, 'GetAllGroupes' ]);
 $router->get('/groupe/@id:[0-9]+', [ $GroupeController, 'GetGroupeById' ]);
+$router->get('/groupe/insert', [ $GroupeController, 'formGroupe' ]);
 $router->post('/groupe/insert', [ $GroupeController, 'InsertGroupe' ]);
 $router->post('/groupe/update/@id:[0-9]+', [ $GroupeController, 'UpdateGroupe' ]);
 $router->get('/groupe/delete/@id:[0-9]+', [ $GroupeController, 'DeleteGroupe' ]);
 
 $router->get('/reservations', [ $ReservationController, 'GetAllReservations' ]);
 $router->get('/reservation/@id:[0-9]+', [ $ReservationController, 'GetReservationById' ]);
+$router->get('/reservation/insert', [ $ReservationController, 'formReservation' ]);
 $router->post('/reservation/insert', [ $ReservationController, 'InsertReservation' ]);
 $router->post('/reservation/update/@id:[0-9]+', [ $ReservationController, 'UpdateReservation' ]);
 $router->get('/reservation/delete/@id:[0-9]+', [ $ReservationController, 'DeleteReservation' ]);

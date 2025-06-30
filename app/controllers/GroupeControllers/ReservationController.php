@@ -7,6 +7,14 @@ use Flight;
 
 class ReservationController {
 
+    public function formReservation() {
+
+    
+        $message ="";
+
+        Flight::render('GroupeViews/reservation_form', ['message' => $message]);
+    }
+
     public function InsertReservation() {
         $id_club = Flight::request()->data->id_club;
         $date_reservation = Flight::request()->data->date_reservation;
@@ -17,21 +25,21 @@ class ReservationController {
         $model = new ReservationModel();
         $message = $model->insert($id_club, $date_reservation, $date_reserve, $heure_debut, $heure_fin);
 
-        Flight::render('reservation_form', ['message' => $message]);
+        Flight::render('GroupeViews/reservation_form', ['message' => $message]);
     }
 
     public function GetAllReservations() {
         $model = new ReservationModel();
         $reservations = $model->getAll();
 
-        Flight::render('reservation_list', ['reservations' => $reservations]);
+        Flight::render('GroupeViews/reservation_list', ['reservations' => $reservations]);
     }
 
     public function GetReservationById($id) {
         $model = new ReservationModel();
         $reservation = $model->getById($id);
 
-        Flight::render('reservation_detail', ['reservation' => $reservation]);
+        Flight::render('GroupeViews/reservation_detail', ['reservation' => $reservation]);
     }
 
     public function UpdateReservation($id) {
@@ -45,7 +53,7 @@ class ReservationController {
         $message = $model->update($id, $id_club, $date_reservation, $date_reserve, $heure_debut, $heure_fin);
 
         $reservation = $model->getById($id);
-        Flight::render('reservation_detail', ['reservation' => $reservation, 'message' => $message]);
+        Flight::render('GroupeViews/reservation_detail', ['reservation' => $reservation, 'message' => $message]);
     }
 
     public function DeleteReservation($id) {
@@ -53,6 +61,6 @@ class ReservationController {
         $message = $model->delete($id);
 
         $reservations = $model->getAll();
-        Flight::render('reservation_list', ['reservations' => $reservations, 'message' => $message]);
+        Flight::render('GroupeViews/reservation_list', ['reservations' => $reservations, 'message' => $message]);
     }
 }
