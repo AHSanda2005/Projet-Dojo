@@ -1,5 +1,16 @@
+CREATE DATABASE dojo;
+\c dojo;
+
 -- Type ENUM
 CREATE TYPE etat AS ENUM ('neuve', 'usee', 'abimee');
+CREATE TYPE statut_ecolage AS ENUM ( /* Wanda - update 29-06-25 */
+  'non paye',
+  'paye',
+  'en retard',
+  'annule',
+  'en attente'
+);
+
 
 -- Tables principales
 CREATE TABLE genre (
@@ -34,6 +45,7 @@ CREATE TABLE eleve (
   date_naissance TIMESTAMP,
   adresse VARCHAR,
   contact VARCHAR,
+  date_inscription TIMESTAMP, /* Wanda - update 29-06-25 */
   id_genre INTEGER REFERENCES genre(id_genre)
 );
 
@@ -112,7 +124,8 @@ CREATE TABLE ecolage (
   montant FLOAT,
   date_paiement TIMESTAMP,
   mois INTEGER,
-  annee INTEGER
+  annee INTEGER,
+  statut statut_ecolage DEFAULT 'non_payé' /* Wanda - update 29-06-25 */
 );
 
 -- Clubs
@@ -161,3 +174,5 @@ CREATE TABLE abonnement (
   mois INTEGER,
   actif BOOLEAN
 );
+
+

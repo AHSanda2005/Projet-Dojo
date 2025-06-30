@@ -5,6 +5,7 @@ use app\controllers\AuthController;
 use app\controllers\Controller;
 use app\controllers\EnregistrementController;
 use app\controllers\CrudController;
+use app\controllers\EcolageController;
 
 //importation lié flight
 use flight\Engine;
@@ -23,6 +24,12 @@ use flight\net\Router;
 
 $Controller = new Controller();
 $router->get('/', [ $Controller, 'acceuil' ]);
+
+$ecolageController = new EcolageController();
+
+$router->get('/ecolage/paiement/@id_eleve', [$ecolageController, 'paiementEcolageForm']);
+Flight::route('POST /payer', [$ecolageController, 'paiementEcolage']);
+$router->get('/ecolage/liste_paiement/@id_eleve', [$ecolageController, 'afficherPaiements']);
 
 // $router->get('/', \app\controllers\WelcomeController::class.'->home'); 
 
