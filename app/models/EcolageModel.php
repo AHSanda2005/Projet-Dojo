@@ -68,6 +68,19 @@ class EcolageModel {
         ]);
     }
 
+    public function getEcolageByEleve($id_eleve) {
+        $stmt = $this->db->prepare("
+            SELECT * 
+            FROM {$this->table} 
+            WHERE id_eleve = :id_eleve
+            ORDER BY annee DESC, mois DESC
+        ");
+        $stmt->execute([':id_eleve' => $id_eleve]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    
+
      
     // public function updateStatutEnPaye($idEcolage) {
     //     $stmt = $this->db->prepare("
