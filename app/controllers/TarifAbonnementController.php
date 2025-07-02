@@ -1,7 +1,7 @@
 <?php
-namespace app\controllers\GroupeControllers;
+namespace app\controllers;
 
-use app\models\TarifModels\TarifAbonnementModel;
+use app\models\TarifAbonnementModel;
 use Flight;
 
 class TarifAbonnementController {

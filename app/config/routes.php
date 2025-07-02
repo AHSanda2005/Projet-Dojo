@@ -1,9 +1,10 @@
 <?php
 
 //importation de controller
-use app\controllers\GroupeControllers\AbonnementController;
-use app\controllers\GroupeControllers\TarifAbonnementController;
-use app\controllers\GroupeControllers\TarifClubController;
+
+use app\controllers\AbonnementController;
+use app\controllers\TarifAbonnementController;
+use app\controllers\TarifClubController;
 
 //importation lié flight
 use flight\Engine;

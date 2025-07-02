@@ -1,5 +1,5 @@
 <?php
-namespace app\models\GroupeModels;
+namespace app\models;
 
 use PDO;
 use Flight;
