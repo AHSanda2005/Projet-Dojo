@@ -1,15 +1,15 @@
 <?php
-namespace app\models;
+namespace app\models\TarifAbonnementModel;
 
 use Flight;
 use PDO;
 
-class TarifClubModel {
-    public function insert($montant_par_heure) {
+class TarifAbonnementModel {
+    public function insert($montant) {
         try {
             $db = Flight::db();
-            $stmt = $db->prepare("INSERT INTO tarif_club (montant_par_heure) VALUES (:montant)");
-            $stmt->execute([':montant' => $montant_par_heure]);
+            $stmt = $db->prepare("INSERT INTO tarif_abonnement (montant) VALUES (:montant)");
+            $stmt->execute([':montant' => $montant]);
             return "Insertion réussie !";
         } catch (\PDOException $e) {
             return "Erreur : " . $e->getMessage();
@@ -19,7 +19,7 @@ class TarifClubModel {
     public function getAll() {
         try {
             $db = Flight::db();
-            $stmt = $db->query("SELECT * FROM tarif_club");
+            $stmt = $db->query("SELECT * FROM tarif_abonnement");
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             return [];
@@ -29,7 +29,7 @@ class TarifClubModel {
     public function getById($id) {
         try {
             $db = Flight::db();
-            $stmt = $db->prepare("SELECT * FROM tarif_club WHERE id_tarif = :id");
+            $stmt = $db->prepare("SELECT * FROM tarif_abonnement WHERE id_tarif = :id");
             $stmt->execute([':id' => $id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
@@ -40,7 +40,7 @@ class TarifClubModel {
     public function delete($id) {
         try {
             $db = Flight::db();
-            $stmt = $db->prepare("DELETE FROM tarif_club WHERE id_tarif = :id");
+            $stmt = $db->prepare("DELETE FROM tarif_abonnement WHERE id_tarif = :id");
             $stmt->execute([':id' => $id]);
             return $stmt->rowCount() > 0 ? "Suppression réussie." : "Aucun tarif trouvé.";
         } catch (\PDOException $e) {
@@ -48,14 +48,15 @@ class TarifClubModel {
         }
     }
 
-    public function update($id, $montant_par_heure) {
+    public function update($id, $montant) {
         try {
             $db = Flight::db();
-            $stmt = $db->prepare("UPDATE tarif_club SET montant_par_heure = :montant WHERE id_tarif = :id");
-            $stmt->execute([':montant' => $montant_par_heure, ':id' => $id]);
+            $stmt = $db->prepare("UPDATE tarif_abonnement SET montant = :montant WHERE id_tarif = :id");
+            $stmt->execute([':montant' => $montant, ':id' => $id]);
             return $stmt->rowCount() > 0 ? "Mise à jour réussie." : "Aucune modification effectuée.";
         } catch (\PDOException $e) {
             return "Erreur de mise à jour : " . $e->getMessage();
         }
     }
 }
+?>

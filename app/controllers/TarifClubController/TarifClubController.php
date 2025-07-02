@@ -1,7 +1,7 @@
 <?php
-namespace app\controllers;
+namespace app\controllers\TarifClubController;
 
-use app\models\TarifClubModel;
+use app\models\TarifClubModel\TarifClubModel;
 use Flight;
 
 class TarifClubController {

@@ -2,9 +2,9 @@
 
 //importation de controller
 
-use app\controllers\AbonnementController;
-use app\controllers\TarifAbonnementController;
-use app\controllers\TarifClubController;
+use app\controllers\AbonnementController\AbonnementController;
+use app\controllers\TarifAbonnementController\TarifAbonnementController;
+use app\controllers\TarifClubController\TarifClubController;
 
 //importation lié flight
 use flight\Engine;

@@ -1,6 +1,6 @@
 <?php
-namespace app\controllers;
-use app\models\AbonnementModel;
+namespace app\controllers\AbonnementController;
+use app\models\AbonnementModel\AbonnementModel ;
 use Abonnement;
 use Flight;
 
