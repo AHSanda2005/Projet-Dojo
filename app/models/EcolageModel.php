@@ -12,6 +12,69 @@ class EcolageModel {
     public function __construct($db) {
         $this->db = $db;
     }
+    
+    public function create($data) {
+        $stmt = $this->db->prepare("
+            INSERT INTO {$this->table} 
+            (id_eleve, montant, date_paiement, mois, annee, statut) 
+            VALUES (:id_eleve, :montant, :date_paiement, :mois, :annee, :statut)
+        ");
+        
+        return $stmt->execute([
+            ':id_eleve' => $data['id_eleve'],
+            ':montant' => $data['montant'],
+            ':date_paiement' => date('Y-m-d H:i:s'), // Date courante
+            ':mois' => $data['mois'],
+            ':annee' => $data['annee'],
+            ':statut' => 'paye'
+        ]);
+    }
+
+    public function getAll() {
+        $stmt = $this->db->query("SELECT * FROM {$this->table} ORDER BY annee DESC, mois DESC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE id_ecolage = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function update($id, $data) {
+        $stmt = $this->db->prepare("
+            UPDATE {$this->table}
+            SET id_eleve = :id_eleve, montant = :montant, date_paiement = :date_paiement,
+                mois = :mois, annee = :annee, statut = :statut
+            WHERE id_ecolage = :id
+        ");
+        return $stmt->execute([
+            ':id' => $id,
+            ':id_eleve' => $data['id_eleve'],
+            ':montant' => $data['montant'],
+            ':date_paiement' => $data['date_paiement'],
+            ':mois' => $data['mois'],
+            ':annee' => $data['annee'],
+            ':statut' => $data['statut']
+        ]);
+    }
+
+    public function delete($id) {
+        $stmt = $this->db->prepare("DELETE FROM {$this->table} WHERE id_ecolage = :id");
+        return $stmt->execute([':id' => $id]);
+    }
+
+    // Avancé : Récupérer les paiements d’un élève
+    public function getByEleve($id_eleve) {
+        $stmt = $this->db->prepare("
+            SELECT * FROM {$this->table}
+            WHERE id_eleve = :id_eleve
+            ORDER BY annee DESC, mois DESC
+        ");
+        $stmt->execute([':id_eleve' => $id_eleve]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
 
     // deplacer dans model tarif
     public function getTarif(bool $adult): ?float {
@@ -39,7 +102,7 @@ class EcolageModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getAllPaiement(int $id_eleve): array {
+    public function getAllPaiementByEleve(int $id_eleve): array {
         $stmt = $this->db->prepare("
             SELECT id_ecolage, montant, date_paiement, mois, annee, statut
             FROM ecolage
@@ -51,23 +114,6 @@ class EcolageModel {
     }
    
 
-    public function insert($data) {
-        $stmt = $this->db->prepare("
-            INSERT INTO {$this->table} 
-            (id_eleve, montant, date_paiement, mois, annee, statut) 
-            VALUES (:id_eleve, :montant, :date_paiement, :mois, :annee, :statut)
-        ");
-        
-        return $stmt->execute([
-            ':id_eleve' => $data['id_eleve'],
-            ':montant' => $data['montant'],
-            ':date_paiement' => date('Y-m-d H:i:s'), // Date courante
-            ':mois' => $data['mois'],
-            ':annee' => $data['annee'],
-            ':statut' => 'paye'
-        ]);
-    }
-
     public function getEcolageByEleve($id_eleve) {
         $stmt = $this->db->prepare("
             SELECT * 
@@ -78,8 +124,6 @@ class EcolageModel {
         $stmt->execute([':id_eleve' => $id_eleve]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-
 
      
     public function updateStatutEnPaye($idEcolage) {
@@ -95,16 +139,19 @@ class EcolageModel {
     }
     
  
-    // public function getDernierEcolageNonPaye($id_eleve) {
-    //     $sql = "SELECT mois, annee 
-    //             FROM ecolage 
-    //             WHERE id_eleve = :id_eleve AND statut = 'non paye'
-    //             ORDER BY annee, mois
-    //             LIMIT 1";
-    //     $stmt = $this->db->prepare($sql);
-    //     $stmt->execute(['id_eleve' => $id_eleve]);
-    //     return $stmt->fetch(PDO::FETCH_ASSOC) ?: ['mois' => date('n'), 'annee' => date('Y')];
-    // }
+    public function getDernierEcolageNonPaye($id_eleve) {
+        $stmt = $this->db->prepare("
+            SELECT *
+            FROM {$this->table}
+            WHERE id_eleve = :id_eleve
+              AND statut = 'non paye'
+            ORDER BY annee DESC, mois DESC
+            LIMIT 1
+        ");
+        $stmt->execute([':id_eleve' => $id_eleve]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
 
 }
 
