@@ -38,5 +38,25 @@ class TarifClubController {
         $tarifs = $model->getAll();
         Flight::render('TarifViews/club_list', ['tarifs' => $tarifs, 'message' => $message]);
     }
+    public function hourlyRate($id){
+        $model = new TarifClubModel();
+        $tarif = $model->getById($id);
+        if ($tarif) {
+            Flight::json(['montant_par_heure' => $tarif['montant_par_heure']]);
+        } else {
+            Flight::json(['error' => 'Tarif non trouvé'], 404);
+        }
+    }
+    public function groupPrice($id, $taille) {
+        $model = new TarifClubModel();
+        $tarif = $model->getById($id);
+        if ($tarif) {
+            $montant_par_heure = $tarif['montant_par_heure'];
+            $prix_total = $montant_par_heure * $taille;
+            Flight::json(['prix_total' => $prix_total]);
+        } else {
+            Flight::json(['error' => 'Tarif non trouvé'], 404);
+        }
+    }
 }
 ?>

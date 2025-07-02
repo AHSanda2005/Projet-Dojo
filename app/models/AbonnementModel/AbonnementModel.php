@@ -62,9 +62,9 @@ class AbonnementModel {
             $db = Flight::db();
             $stmt = $db->prepare("UPDATE abonnement SET mois = mois + 1 WHERE id_abonnement = ? AND actif = true");
             $stmt->execute([$id]);
-            return "Mise à jour réussie !";
+            return $stmt->rowCount() > 0 ? "Renouvellement automatique réussi." : "Échec.";
         } catch (\PDOException $e) {
-            return "Erreur de mise à jour : " . $e->getMessage();
+            return "Erreur : " . $e->getMessage();
         }
     }
     public function annuler($id) {
@@ -77,15 +77,80 @@ class AbonnementModel {
             return "Erreur lors de l'annulation : " . $e->getMessage();
         }
     }
-    public static function getExpirationsDans7Jours() {
+    public function isActive($id) {
+        $abonnement = $this->getById($id);
+        return $abonnement && $abonnement['actif'];
+    }
+
+    public function daysRemaining($id) {
+        $abonnement = $this->getById($id);
+        if ($abonnement && $abonnement['actif']) {
+            return $abonnement['mois'] * 30; // Approximation en jours
+        }
+        return 0;
+    }
+
+
+    public function getExpirationsDans7Jours() {
         try {
             $db = Flight::db();
-            $stmt = $db->prepare("SELECT * FROM abonnement WHERE actif = true AND mois <= 1");
+            $stmt = $db->prepare("SELECT * FROM abonnement WHERE actif = true AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) >= DATE_ADD(CURDATE(), INTERVAL mois MONTH)");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        }  catch (\PDOException $e) {
-            return "Erreur lors de la récupération des abonnements : " . $e->getMessage();
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
+   
+    /**
+     * Vérifie si un abonnement peut être renouvelé*/
+    public function canRenew($id) {
+        $abonnement = $this->getById($id);
+        return $abonnement && $abonnement['actif'];
+    }
+
+    /**
+     * Génère une facture pro-forma pour un abonnement
+     */
+    public function generateProforma($id) {
+        $abonnement = $this->getById($id);
+        if (!$abonnement) {
+            return null;
+        }
+        // Supposition : tarif fixe de 100 par mois (à ajuster selon votre logique)
+        $montantParMois = 100;
+        $total = $abonnement['mois'] * $montantParMois;
+        return [
+            'id' => $id,
+            'mois' => $abonnement['mois'],
+            'total' => $total
+        ];
+    }
+
+    /**
+     * Envoie un email de rappel pour un abonnement
+     */
+    public function sendReminderEmail($id) {
+        $abonnement = $this->getById($id);
+        if (!$abonnement || !$abonnement['email']) {
+            return "Email non trouvé.";
+        }
+        $mail = new PHPMailer();
+        $mail->isSMTP();
+        $mail->Host = 'smtp.example.com'; // Remplacez par votre hôte SMTP
+        $mail->SMTPAuth = true;
+        $mail->Username = 'your-email@example.com'; // Votre email
+        $mail->Password = 'your-password'; // Votre mot de passe
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+        $mail->setFrom('your-email@example.com', 'Votre Nom');
+        $mail->addAddress($abonnement['email']);
+        $mail->Subject = 'Rappel d\'expiration d\'abonnement';
+        $mail->Body = 'Votre abonnement expire bientôt. Veuillez renouveler.';
+        if ($mail->send()) {
+            return "Email envoyé.";
+        } else {
+            return "Erreur d'envoi : " . $mail->ErrorInfo;
         }
     }
 }

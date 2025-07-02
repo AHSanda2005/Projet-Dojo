@@ -58,5 +58,17 @@ class TarifAbonnementModel {
             return "Erreur de mise à jour : " . $e->getMessage();
         }
     }
+     /**
+     * Récupère le tarif actuel (supposons le dernier inséré ou avec un champ 'actif').
+     */
+    public function getCurrentTarif() {
+        try {
+            $db = Flight::db();
+            $stmt = $db->query("SELECT * FROM tarif_abonnement WHERE actif = true ORDER BY id DESC LIMIT 1");
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return null;
+        }
+    }
 }
 ?>

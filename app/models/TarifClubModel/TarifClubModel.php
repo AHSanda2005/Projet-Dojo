@@ -58,4 +58,21 @@ class TarifClubModel {
             return "Erreur de mise à jour : " . $e->getMessage();
         }
     }
+    /**
+     * Récupère le taux horaire pour un tarif club.
+     */
+    public function getHourlyRate($id) {
+        $tarif = $this->getById($id);
+        return $tarif ? $tarif['montant_par_heure'] : null;
+    }
+    /**
+     * Calcule le prix total pour un groupe basé sur la taille du groupe et le taux horaire.
+     */
+    public function calculateGroupPrice($id, $group_size) {
+        $tarif = $this->getById($id);
+        if ($tarif && $group_size > 0) {
+            return $tarif['montant_par_heure'] * $group_size;
+        }
+        return null;
+    }
 }
