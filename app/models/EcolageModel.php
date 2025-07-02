@@ -79,20 +79,20 @@ class EcolageModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    
+
 
      
-    // public function updateStatutEnPaye($idEcolage) {
-    //     $stmt = $this->db->prepare("
-    //         UPDATE {$this->table}
-    //         SET statut = 'paye'
-    //         WHERE id_ecolage = :id_ecolage
-    //     ");
+    public function updateStatutEnPaye($idEcolage) {
+        $stmt = $this->db->prepare("
+            UPDATE {$this->table}
+            SET statut = 'paye'
+            WHERE id_ecolage = :id_ecolage
+        ");
     
-    //     return $stmt->execute([
-    //         ':id_ecolage' => $idEcolage
-    //     ]);
-    // }
+        return $stmt->execute([
+            ':id_ecolage' => $idEcolage
+        ]);
+    }
     
  
     // public function getDernierEcolageNonPaye($id_eleve) {
