@@ -7,25 +7,35 @@ use Flight;
 
 class ReservationModel {
 
-    public function insert($id_club, $date_reservation, $date_reserve, $heure_debut, $heure_fin) {
-        try {
-            $db = Flight::db();
-            $stmt = $db->prepare("
-                INSERT INTO reservation (id_club, date_reservation, date_reserve, heure_debut, heure_fin)
-                VALUES (:id_club, :date_reservation, :date_reserve, :heure_debut, :heure_fin)
-            ");
-            $stmt->execute([
-                ':id_club' => $id_club,
-                ':date_reservation' => $date_reservation,
-                ':date_reserve' => $date_reserve,
-                ':heure_debut' => $heure_debut,
-                ':heure_fin' => $heure_fin,
-            ]);
-            return "Réservation enregistrée avec succès.";
-        } catch (\PDOException $e) {
-            return "Erreur d'insertion : " . $e->getMessage();
-        }
-    }
+    public function insert(
+    int $id_club,
+    string $date_reservation,
+    string $date_reserve,
+    string $heure_debut,
+    string $heure_fin
+): int {
+    $db = Flight::db();
+
+    $sql = "
+        INSERT INTO reservation
+            (id_club, date_reservation, date_reserve, heure_debut, heure_fin)
+        VALUES
+            (:id_club, :date_reservation, :date_reserve, :heure_debut, :heure_fin)
+        RETURNING id_reservation
+    ";
+
+    $stmt = $db->prepare($sql);
+    $stmt->execute([
+        ':id_club'          => $id_club,
+        ':date_reservation' => $date_reservation,
+        ':date_reserve'     => $date_reserve,
+        ':heure_debut'      => $heure_debut,
+        ':heure_fin'        => $heure_fin
+    ]);
+
+    return (int) $stmt->fetchColumn();
+}
+
 
     public function getAll() {
         try {

@@ -1,5 +1,6 @@
 -- Type ENUM
 CREATE TYPE etat AS ENUM ('neuve', 'usee', 'abimee');
+CREATE TYPE valeur AS ENUM ('demande', 'confirme', 'payee', 'annule');
 
 -- Tables principales
 CREATE TABLE genre (
@@ -134,7 +135,7 @@ CREATE TABLE reservation (
 
 CREATE TABLE paiement (
   id_payement SERIAL PRIMARY KEY,
-  id_groupe INTEGER REFERENCES club_groupe(id),
+  id_reservation INTEGER REFERENCES reservation(id_reservation),
   montant FLOAT,
   date_paiement TIMESTAMP
 );
@@ -161,3 +162,9 @@ CREATE TABLE abonnement (
   mois INTEGER,
   actif BOOLEAN
 );
+
+CREATE TABLE status (
+  id_status SERIAL PRIMARY KEY,
+  id_reservation INTEGER REFERENCES reservation(id_reservation),
+  valeur valeur
+)
