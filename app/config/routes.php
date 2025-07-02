@@ -22,6 +22,11 @@ use flight\net\Router;
 $GroupeController = new GroupeController();
 $ReservationController = new ReservationController();
 
+
+$router->get('/test', function() {
+    Flight::json(['message' => 'Test OK']);
+});
+
 $router->get('/', [ $GroupeController, 'formGroupe' ]);
 $router->get('/groupes', [ $GroupeController, 'GetAllGroupes' ]);
 $router->get('/groupe/@id:[0-9]+', [ $GroupeController, 'GetGroupeById' ]);
@@ -36,6 +41,8 @@ $router->get('/reservation/insert', [ $ReservationController, 'formReservation' 
 $router->post('/reservation/insert', [ $ReservationController, 'InsertReservation' ]);
 $router->post('/reservation/update/@id:[0-9]+', [ $ReservationController, 'UpdateReservation' ]);
 $router->get('/reservation/delete/@id:[0-9]+', [ $ReservationController, 'DeleteReservation' ]);
+
+
 
 // $router->get('/', \app\controllers\WelcomeController::class.'->home'); 
 
