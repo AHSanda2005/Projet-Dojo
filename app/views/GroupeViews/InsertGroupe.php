@@ -1,0 +1,11 @@
+<h2>Ajouter un Groupe</h2>
+<form method="post" action="/S4(htdocs)/Projet-Dojo/groupe/insert">
+    <label>Responsable:</label><br>
+    <input type="text" name="nom_responsable" required><br>
+    <label>Contact:</label><br>
+    <input type="text" name="contact" required><br>
+    <label>Nombre:</label><br>
+    <input type="number" name="nombre" required><br><br>
+    <input type="submit" value="Ajouter">
+</form>
+<?= isset($message) ? "<p>$message</p>" : "" ?>
