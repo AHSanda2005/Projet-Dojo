@@ -1,10 +1,10 @@
 <?php
 
 //importation de controller
-use app\controllers\AuthController;
 use app\controllers\Controller;
-use app\controllers\EnregistrementController;
-use app\controllers\CrudController;
+use app\controllers\controllersCours\CoursController;
+use app\controllers\controllersCours\SeancesController;
+use app\controllers\controllersCours\CalendrierController;
 
 //importation lié flight
 use flight\Engine;
@@ -24,17 +24,30 @@ use flight\net\Router;
 $Controller = new Controller();
 $router->get('/', [ $Controller, 'acceuil' ]);
 
-// $router->get('/', \app\controllers\WelcomeController::class.'->home'); 
+$coursController = new CoursController();
+$seancesController = new SeancesController();
+$calendrierController = new CalendrierController();
 
-// $router->get('/hello-world/@name', function($name) {
-// 	echo '<h1>Hello world! Oh hey '.$name.'!</h1>';
-// });
+$router->get('/formHistorique', [$coursController, 'afficherHistorique']);
+$router->get('/formEmploi', [$coursController, 'genererEmploiDuTemps']);
 
-// $router->group('/api', function() use ($router, $app) {
-// 	$Api_Example_Controller = new ApiExampleController($app);
-// 	$router->get('/users', [ $Api_Example_Controller, 'getUsers' ]);
-// 	$router->get('/users/@id:[0-9]', [ $Api_Example_Controller, 'getUser' ]);
-// 	$router->post('/users/@id:[0-9]', [ $Api_Example_Controller, 'updateUser' ]);
-// });
+// Cours
+$router->get('/listeCours',[$coursController,'getAllCours']);
+$router->get('/formCours', [$coursController, 'getFormCours']);
+$router->post('/insertCours', [$coursController, 'insertCours']);
+$router->post('/updateCours', [$coursController, 'updateCours']);
+$router->get('/deleteCours', [$coursController, 'deleteCours']);
+
+// Seances
+$router->get('/formSeance', [$seancesController, 'getFormSeance']);
+$router->post('/insertSeance', [$seancesController, 'insertSeance']);
+$router->post('/updateSeance', [$seancesController, 'updateSeance']);
+$router->get('/deleteSeance', [$seancesController, 'deleteSeance']);
+$router->get('/listeSeances', [$seancesController, 'getAllSeances']);
+$router->get('/historiqueSeances', [$seancesController, 'historiqueSeances']);
+
+// EDT
+$router->get('/calendrier', [$calendrierController, 'afficherMois']);
+$router->get('/calendrier/details', [$calendrierController, 'detailsGroupe']);
 
 ?>

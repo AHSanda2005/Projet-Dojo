@@ -1,5 +1,6 @@
 -- Type ENUM
 CREATE TYPE etat AS ENUM ('neuve', 'usee', 'abimee');
+CREATE TYPE statut AS ENUM ('cree','modifie','annule');
 
 -- Tables principales
 CREATE TABLE genre (
@@ -85,18 +86,31 @@ CREATE TABLE cours (
   label VARCHAR
 );
 
+CREATE TABLE plage_horaire (
+    id SERIAL PRIMARY KEY,
+    heure_debut TIME UNIQUE,
+    heure_fin TIME UNIQUE
+);
+
+INSERT INTO plage_horaire (heure_debut, heure_fin) VALUES
+('08:00', '10:00'),
+('10:00', '12:00'),
+('13:00', '15:00'),
+('15:00', '17:00');
+
 CREATE TABLE seances_cours (
-  id_seances SERIAL PRIMARY KEY,
-  id_cours INTEGER REFERENCES cours(id_cours),
-  date DATE,
-  heure_debut TIME,
-  heure_fin TIME
+    id_seances SERIAL PRIMARY KEY,
+    id_cours INTEGER REFERENCES cours(id_cours),
+    date DATE NOT NULL,
+    id_plage INTEGER REFERENCES plage_horaire(id),
+    id_prof INTEGER REFERENCES prof(id_prof)
 );
 
 CREATE TABLE historique_seances (
   id_historique SERIAL PRIMARY KEY,
   id_seances INTEGER REFERENCES seances_cours(id_seances),
-  date DATE
+  date DATE,
+  statut statut
 );
 
 CREATE TABLE evolution (
@@ -153,6 +167,11 @@ CREATE TABLE tarif_abonnement (
   montant FLOAT
 );
 
+CREATE TABLE maximum (
+  nombre_eleve_cours INTEGER,
+  nombre_eleve INTEGER
+);
+
 CREATE TABLE abonnement (
   id_abonnement SERIAL PRIMARY KEY,
   id_club INTEGER REFERENCES club_groupe(id),
@@ -160,4 +179,42 @@ CREATE TABLE abonnement (
   mois INTEGER,
   actif BOOLEAN
 );
+
+CREATE TABLE gestion_groupe (
+    id SERIAL PRIMARY KEY,
+    id_eleve INTEGER REFERENCES eleve(id_eleve),
+    mois INTEGER,
+    annee INTEGER,
+    groupe INTEGER,
+    UNIQUE (id_eleve, mois, annee)
+);
+
+CREATE TABLE planification_cours (
+    id SERIAL PRIMARY KEY,
+    id_seance INTEGER REFERENCES seances_cours(id_seances),
+    groupe INTEGER,
+    UNIQUE (id_seance, groupe)
+);
+
+-- 1. Genres (nécessaires pour prof et eleve)
+INSERT INTO genre (label) VALUES ('Homme'), ('Femme');
+
+-- 2. Profs
+INSERT INTO prof (nom, prenom, date_naissance, adresse, contact, id_genre) VALUES
+('Rakoto', 'Jean', '1980-01-01', 'Antananarivo', '0321123456', 1),
+('Rabe', 'Pauline', '1985-06-15', 'Fianarantsoa', '0321987654', 2);
+
+-- 3. Élèves
+INSERT INTO eleve (nom, prenom, date_naissance, adresse, contact, id_genre) VALUES
+('Andrianina', 'Sarah', '2010-04-12', 'Antsirabe', '0341122334', 2),
+('Ravelo', 'Marc', '2009-08-23', 'Mahajanga', '0334455667', 1),
+('Rakotovao', 'Lova', '2011-11-01', 'Toamasina', '0339988776', 1),
+('Rasoa', 'Miora', '2010-02-18', 'Toliara', '0322345678', 2);
+
+-- 5. Paiement ecolage pour affectation des groupes (ex. Juin 2025)
+INSERT INTO ecolage (id_eleve, montant, date_paiement, mois, annee) VALUES
+(1, 30000, '2025-07-01', 7, 2025),
+(2, 30000, '2025-06-02', 6, 2025),
+(3, 30000, '2025-06-03', 6, 2025),
+(4, 30000, '2025-06-03', 6, 2025);
 
