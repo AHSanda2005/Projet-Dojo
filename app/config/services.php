@@ -41,8 +41,11 @@ Flight::map('sign', function () {
     Flight::render('template/sign');
 });
 
-Flight::map('menu', function () {
-    Flight::render('template/sidebar');
+Flight::map('menuAdmin', function () {
+    Flight::render('template/menu/adminSidebar');
+});
+Flight::map('menuSupervisor', function () {
+    Flight::render('template/menu/supervisorSidebar');
 });
 
 Flight::map('footer', function () {

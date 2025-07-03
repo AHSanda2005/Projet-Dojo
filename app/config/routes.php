@@ -22,7 +22,26 @@ use flight\net\Router;
 });*/
 
 $Controller = new Controller();
+// exemple de base
 $router->get('/', [ $Controller, 'acceuil' ]);
+$router->get('/login', [ $Controller, 'login' ]);
+$router->get('/signin', [ $Controller, 'login' ]);
+
+// page statistique
+$router->get('/demographie', [ $Controller, 'demographie' ]);
+$router->get('/abonnement', [ $Controller, 'abonnement' ]);
+
+// page suivi
+$router->get('/presence', [ $Controller, 'presence' ]);
+$router->get('/personnel', [ $Controller, 'personnel' ]);
+$router->get('/club', [ $Controller, 'club' ]);
+
+$router->get('/salle', [ $Controller, 'club' ]);
+
+
+// page gestion
+$router->get('/tarif', [ $Controller, 'tarif' ]);
+$router->get('/edt', [ $Controller, 'edt' ]);
 
 // $router->get('/', \app\controllers\WelcomeController::class.'->home'); 
 

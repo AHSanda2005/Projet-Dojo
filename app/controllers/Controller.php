@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\models\Status;
 use Flight;
 
 class Controller {
@@ -11,9 +10,44 @@ class Controller {
     }
 
     public function acceuil() {
-        $status = new Status(); 
-        $data = $status->getStatus();
-
-        Flight::render('acceuil', ['status' => $data]);
+        Flight::render('acceuil');
     }
+
+    public function login() {
+        Flight::render('template/auth/login');
+
+    }
+    public function signin() {
+        Flight::render('template/auth/signin');
+
+    }
+
+    public function demographie() {
+        Flight::render('statistique/demographie');
+    }
+
+    public function abonnement() {
+        Flight::render('statistique/abonnement');
+    }
+
+    public function presence() {
+        Flight::render('suivi/presence');
+    }
+
+    public function personnel() {
+        Flight::render('suivi/personnel');
+    }
+
+    public function club() {
+        Flight::render('suivi/club');
+    }
+
+    public function tarif() {
+        Flight::render('gestion/tarif');
+    }
+
+    public function edt() {
+        Flight::render('gestion/edt');
+    }
+
 }
