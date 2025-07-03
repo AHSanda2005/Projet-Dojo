@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-use app\models\Status;
+use app\models\utilisateurModels\Database;
 use Flight;
 
 class Controller {
@@ -11,9 +11,14 @@ class Controller {
     }
 
     public function acceuil() {
-        $status = new Status(); 
-        $data = $status->getStatus();
+        // Test de la connexion à la base de données uniquement
+        $config = Flight::get('config');
+        $database = new Database($config['database']);
+        $dbStatus = $database->testConnection();
 
-        Flight::render('acceuil', ['status' => $data]);
+        // Passer les données à la vue
+        Flight::render('acceuil', [
+            'db_status' => $dbStatus
+        ]);
     }
 }
