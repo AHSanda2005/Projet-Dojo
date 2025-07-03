@@ -40,7 +40,7 @@
                             <td><?= htmlspecialchars($s['nom_prof']) ?> <?= htmlspecialchars($s['prenom_prof']) ?></td>
                             <td class="text-center">
                                 <a href="/formSeance?id=<?= $s['id_seances'] ?>" class="btn btn-sm btn-warning">Modifier</a>
-                                <a href="/deleteSeance?id=<?= $s['id_seances'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cette séance ?')">Supprimer</a>
+                                <!-- <a href="/deleteSeance?id=<?= $s['id_seances'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cette séance ?')">Supprimer</a> -->
                             </td>
                         </tr>
                     <?php endforeach; ?>
