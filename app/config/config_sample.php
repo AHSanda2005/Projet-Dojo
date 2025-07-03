@@ -31,7 +31,7 @@ if(empty($app)) {
 $app->path(__DIR__ . $ds . '..' . $ds . '..');
 
 // This is where you can set some flight config variables. 
-$app->set('flight.base_url', '/'); // if this is in a subdirectory, you'll need to change this
+$app->set('flight.base_url', '/Projet-Dojo'); // if this is in a subdirectory, you'll need to change this
 $app->set('flight.case_sensitive', false); // if you want case sensitive routes, set this to true
 $app->set('flight.log_errors', true); // if you want to log errors, set this to true
 $app->set('flight.handle_errors', false); // if you want flight to handle errors, set this to true, otherwise Tracy will handle them
@@ -73,6 +73,10 @@ return [
 		// 'dbname' => 'dbname',
 		// 'user' => 'user',
 		// 'password' => 'password'
+		'host' => 'localhost',
+		 'dbname' => 'dojo',
+		 'user' => 'postgres',
+		 'password' => 'postgres'
 
 		// uncomment the following line for sqlite
 		// 'file_path' => __DIR__ . $ds . '..' . $ds . 'database.sqlite'

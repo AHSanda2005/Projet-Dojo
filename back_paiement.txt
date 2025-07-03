@@ -1,0 +1,12 @@
+Table modifie :
+dans update_base.sql
+
+Fonctionnalite :
+Paiement Reservation:
+- recherche reservation par (Nom reseponsable club, date_reservee, heure)
+- paiememt via bouton payer 
+
+Paiement ecolage:
+- paiement par id_eleve
+- insertion dans table  ecolage
+- crud

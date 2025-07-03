@@ -7,6 +7,7 @@ use app\controllers\EnregistrementController;
 use app\controllers\CrudController;
 use app\controllers\EcolageController;
 use app\controllers\PaiementController;
+use app\controllers\ReservationController;
 
 //importation lié flight
 use flight\Engine;
@@ -52,6 +53,12 @@ Flight::route('GET /paiement/delete/@id', [$paiementControlleur, 'delete']);
 Flight::route('GET /paiement/groupe/@id', [$paiementControlleur, 'paiementsParGroupe']);
 Flight::route('GET /paiement/@id', [$paiementControlleur, 'show']);
 Flight::route('GET /paiement', [$paiementControlleur, 'index']);
+
+Flight::route('POST /paiement/form', [$paiementControlleur, 'payerReservation']);
+
+$reservationController = new ReservationController();
+Flight::route('GET /reservation/search', [$reservationController, 'searchForm']);
+Flight::route('POST /reservation/search', [$reservationController, 'search']);
 
 
 

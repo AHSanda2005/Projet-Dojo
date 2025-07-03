@@ -3,11 +3,34 @@
 namespace app\controllers;
 
 use app\models\PaiementModel;
+use app\models\StatusModel;
+use app\models\ReservationModel;
 use Flight;
 
 class PaiementController {
 
     public function __construct() {
+    }
+
+    public function payerReservation() {
+        $id_reservation = (int) Flight::request()->data->id_reservation;
+
+        // 1. Enregistrer le paiement
+        $paiementModel = new PaiementModel(Flight::db());
+        $paiementModel->create($id_reservation);
+
+        // 2. Mettre à jour le statut
+        $statusModel = new StatusModel(Flight::db());
+        $statusModel->updateByReservation($id_reservation, 'payee');
+
+        // 3. Recharger les résultats de recherche
+        $reservationModel = new ReservationModel(Flight::db());
+        $reservations = $reservationModel->searchReservation([]); // recharge tout
+
+        Flight::render('reservation/search', [
+            'reservations' => $reservations,
+            'old' => [] // champs vides pour ne pas remplir le formulaire
+        ]);
     }
 
     //Afficher tous les paiements
@@ -65,6 +88,8 @@ class PaiementController {
         $paiements = $model->getAllByGroupe($id_groupe);
         Flight::render('paiement/by_groupe', ['paiements' => $paiements, 'id_groupe' => $id_groupe]);
     }
+
+
 }
 
 ?>

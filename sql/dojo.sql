@@ -3,13 +3,6 @@ CREATE DATABASE dojo;
 
 -- Type ENUM
 CREATE TYPE etat AS ENUM ('neuve', 'usee', 'abimee');
-CREATE TYPE statut_ecolage AS ENUM ( /* Wanda - update 29-06-25 */
-  'non paye',
-  'paye',
-  'en retard',
-  'annule',
-  'en attente'
-);
 
 
 -- Tables principales
@@ -176,3 +169,12 @@ CREATE TABLE abonnement (
 );
 
 
+
+CREATE TYPE valeur AS ENUM ('demande', 'confirme', 'payee', 'annule');
+
+
+CREATE TABLE status (
+  id_status SERIAL PRIMARY KEY,
+  id_reservation INTEGER REFERENCES reservation(id_reservation),
+  valeur valeur
+);

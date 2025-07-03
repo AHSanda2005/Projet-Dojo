@@ -30,3 +30,14 @@ VALUES
   ('Randrianarisoa Fanja', '0331122334', 8);
 
 INSERT INTO tarif_abonnement (montant) VALUES (200000.00);
+
+
+INSERT INTO reservation (id_club, date_reservation, date_reserve, heure_debut, heure_fin) VALUES
+(1, '2025-01-03 00:00:00', '2025-02-03 00:00:00', '09:00:00', '11:00:00'),
+(2, '2025-01-10 00:00:00', '2025-03-15 00:00:00', '14:00:00', '16:00:00');
+
+INSERT INTO status (id_reservation, valeur) VALUES
+(1, 'demande'),
+(2, 'demande');
+
+INSERT INTO tarif_club (montant_par_heure) VALUES (20000.0);
