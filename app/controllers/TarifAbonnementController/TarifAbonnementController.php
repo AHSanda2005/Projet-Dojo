@@ -39,10 +39,10 @@ class TarifAbonnementController {
         Flight::render('TarifViews/abonnement_list', ['tarifs' => $tarifs, 'message' => $message]);
     }
 
-  public function getCurrentTarif(){
-    $model = new TarifAbonnementModel();
-    $tarif = $model->getCurrentTarif();
-    Flight::render('TarifViews/abonnement_current', ['tarif' => $tarif]);
-  }
+    public function getCurrentTarif(){
+        $model = new TarifAbonnementModel();
+        $tarif = $model->getCurrentTarif();
+        Flight::render('TarifViews/abonnement_current', ['tarif' => $tarif]);
+    }
 }
 ?>

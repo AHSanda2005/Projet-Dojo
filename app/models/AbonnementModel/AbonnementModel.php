@@ -18,7 +18,7 @@ class AbonnementModel {
     public function getById($id) {
         try {
             $db = Flight::db();
-            $stmt = $db->prepare("SELECT * FROM abonnement WHERE id = :id");
+            $stmt = $db->prepare("SELECT * FROM abonnement WHERE id_abonnement = :id");
             $stmt->execute([':id' => $id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
@@ -126,7 +126,6 @@ class AbonnementModel {
             'total' => $total
         ];
     }
-
     /**
      * Envoie un email de rappel pour un abonnement
      */

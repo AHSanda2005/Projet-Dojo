@@ -1,5 +1,6 @@
 -- Type ENUM
 CREATE TYPE etat AS ENUM ('neuve', 'usee', 'abimee');
+CREATE TYPE type_tarif_enum AS ENUM ('abonnement', 'club', 'ecolage');
 
 -- Tables principales
 CREATE TABLE genre (
@@ -140,9 +141,10 @@ CREATE TABLE paiement (
 );
 
 CREATE TABLE tarif_ecolage (
-  id_tarif SERIAL PRIMARY KEY,
-  montant FLOAT,
-  adult BOOLEAN
+    id SERIAL PRIMARY KEY,
+    montant FLOAT,
+    adult BOOLEAN,
+    type_abonnement VARCHAR(50)
 );
 
 CREATE TABLE tarif_club (
@@ -160,4 +162,17 @@ CREATE TABLE abonnement (
   jour INTEGER,
   mois INTEGER,
   actif BOOLEAN
+);
+
+-- Création du type ENUM personnalisé
+
+
+-- Création de la table
+CREATE TABLE historique_tarif (
+    id_historique SERIAL PRIMARY KEY,
+    type_tarif type_tarif_enum NOT NULL,
+    id_tarif INTEGER NOT NULL,
+    ancien_montant NUMERIC(10, 2) NOT NULL,
+    nouveau_montant NUMERIC(10, 2) NOT NULL,
+    date_modification TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

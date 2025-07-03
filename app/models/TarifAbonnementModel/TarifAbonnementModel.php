@@ -53,6 +53,15 @@ class TarifAbonnementModel {
             $db = Flight::db();
             $stmt = $db->prepare("UPDATE tarif_abonnement SET montant = :montant WHERE id_tarif = :id");
             $stmt->execute([':montant' => $montant, ':id' => $id]);
+            // Historiser le changement
+            $historique = $db->prepare("INSERT INTO historique_tarif (type_tarif, id_tarif, ancien_montant, nouveau_montant)
+                                        VALUES ('abonnement', :id, :ancien, :nouveau)");
+            $historique->execute([
+                ':id' => $id,
+                ':ancien' => $ancien['montant'],
+                ':nouveau' => $montant
+            ]);
+            
             return $stmt->rowCount() > 0 ? "Mise à jour réussie." : "Aucune modification effectuée.";
         } catch (\PDOException $e) {
             return "Erreur de mise à jour : " . $e->getMessage();
@@ -64,7 +73,7 @@ class TarifAbonnementModel {
     public function getCurrentTarif() {
         try {
             $db = Flight::db();
-            $stmt = $db->query("SELECT * FROM tarif_abonnement WHERE actif = true ORDER BY id DESC LIMIT 1");
+            $stmt = $db->query("SELECT * FROM tarif_abonnement WHERE actif = true ORDER BY id_tarif DESC LIMIT 1");
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             return null;

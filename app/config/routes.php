@@ -58,7 +58,8 @@ $router->get('/tarif-ecolage/@id:[0-9]+', [ $TarifEcolageController, 'show' ]);
 $router->post('/tarif-ecolage/insert', [ $TarifEcolageController, 'create' ]);
 $router->post('/tarif-ecolage/update/@id:[0-9]+', [ $TarifEcolageController, 'update' ]);
 $router->get('/tarif-ecolage/delete/@id:[0-9]+', [ $TarifEcolageController, 'delete' ]);
-$router->get('/tarif-ecolage/actif/@id:[0-9]+', [ $TarifEcolageController, 'prixActif' ]);
-$router->get('/tarif-ecolage/reduction/@id:[0-9]+/@pourcentage:[0-9]+', [ $TarifEcolageController, 'calculerReduction' ]);
+$router->get('/tarif-ecolage/actif/@type_abonnement', [ $TarifEcolageController, 'prixActif' ]);
+$router->post('/tarif-ecolage/reduction', [ $TarifEcolageController, 'calculerReduction' ]);
+
 
 ?>
