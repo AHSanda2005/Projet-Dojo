@@ -161,3 +161,12 @@ CREATE TABLE abonnement (
   mois INTEGER,
   actif BOOLEAN
 );
+
+CREATE TABLE presence (
+  id_presence SERIAL PRIMARY KEY,
+  id_eleve INTEGER REFERENCES eleve(id_eleve),
+  id_seances INTEGER REFERENCES seances_cours(id_seances),
+  present BOOLEAN,
+  date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  remarque TEXT DEFAULT NULL
+);

@@ -5,6 +5,7 @@ use app\controllers\AuthController;
 use app\controllers\Controller;
 use app\controllers\EnregistrementController;
 use app\controllers\CrudController;
+use app\controllers\PresenceController;
 
 //importation lié flight
 use flight\Engine;
@@ -36,5 +37,57 @@ $router->get('/', [ $Controller, 'acceuil' ]);
 // 	$router->get('/users/@id:[0-9]', [ $Api_Example_Controller, 'getUser' ]);
 // 	$router->post('/users/@id:[0-9]', [ $Api_Example_Controller, 'updateUser' ]);
 // });
+
+$presenceController = new PresenceController($app->db());
+
+// Liste toutes les présences
+$router->get('/presences', [ $presenceController, 'index' ]);
+
+// Affiche la feuille de présence pour une séance
+$router->get('/presence/seance/@id_seances:[0-9]+', function($id_seances) use ($presenceController, $app) {
+    $presences = $presenceController->feuillePresence($id_seances);
+    $app->render('presence/feuille', ['presences' => $presences]);
+});
+
+// Ajoute une présence
+$router->post('/presence', function() use ($presenceController) {
+    $data = $_POST;
+    return $presenceController->store($data);
+});
+
+// Met à jour une présence
+$router->post('/presence/update/@id:[0-9]+', function($id) use ($presenceController) {
+    $data = $_POST;
+    return $presenceController->update($id, $data);
+});
+
+// Supprime une présence
+$router->post('/presence/delete/@id:[0-9]+', function($id) use ($presenceController) {
+    return $presenceController->delete($id);
+});
+
+// Liste les absences d'un élève
+$router->get('/presence/absences/@id_eleve:[0-9]+', function($id_eleve) use ($presenceController, $app) {
+    $absences = $presenceController->absencesEleve($id_eleve);
+    $app->render('presence/absences', ['absences' => $absences]);
+});
+// Liste les absents entre deux dates
+$router->get('/presence/absents/@date_debut:[0-9]{4}-[0-9]{2}-[0-9]{2}/@date_fin:[0-9]{4}-[0-9]{2}-[0-9]{2}', function($date_debut, $date_fin) use ($presenceController, $app) {
+    $absents = $presenceController->absentsParDate($date_debut, $date_fin);
+    $app->render('presence/absents', ['absents' => $absents]);
+});
+
+//Liste des presents entre deux dates
+$router->get('/presence/presents/@date_debut:[0-9]{4}-[0-9]{2}-[0-9]{2}/@date_fin:[0-9]{4}-[0-9]{2}-[0-9]{2}', function($date_debut, $date_fin) use ($presenceController, $app) {
+    $absents = $presenceController->absentsParDate($date_debut, $date_fin);
+    $app->render('presence/presents', ['presents' => $absents]);
+});
+ 
+
+
+// Vérifie si l'annulation est possible pour une séance
+$router->get('/presence/annulation-possible/@id_seances:[0-9]+', function($id_seances) use ($presenceController) {
+    return $presenceController->annulationPossible($id_seances) ? 'true' : 'false';
+});
 
 ?>
