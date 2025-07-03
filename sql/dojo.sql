@@ -100,11 +100,15 @@ CREATE TABLE historique_seances (
   date DATE
 );
 
+-- Modification Velo -- 
 CREATE TABLE evolution (
+  id_evolution SERIAL PRIMARY KEY,
   id_prof INTEGER REFERENCES prof(id_prof),
   id_eleve INTEGER REFERENCES eleve(id_eleve),
   avis TEXT
 );
+ALTER TABLE evolution ADD COLUMN note FLOAT;  
+ALTER TABLE evolution ADD COLUMN date_evolution TIMESTAMP;
 
 CREATE TABLE ecolage (
   id_ecolage SERIAL PRIMARY KEY,
