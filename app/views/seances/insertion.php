@@ -47,11 +47,15 @@
                             <option value="">-- Sélectionner --</option>
                             <?php foreach ($plages as $p) : ?>
                                 <?php if (in_array($p['heure_debut'], ['08:00:00', '13:00:00'])) : ?>
+                                    <?php
+                                        $label = ($p['heure_debut'] === '08:00:00') ? 'Matin' : 'Après-midi';
+                                    ?>
                                     <option value="<?= $p['id'] ?>">
-                                        <?= htmlspecialchars($p['heure_debut']) ?> - <?= htmlspecialchars($p['heure_fin']) ?>
+                                        <?= $label ?>
                                     </option>
                                 <?php endif; ?>
                             <?php endforeach; ?>
+
                         </select>
                     </div>
                 <?php endif; ?>

@@ -20,7 +20,6 @@ class SeancesModel {
             $stmt->execute([':id' => $id_plage]);
             $heure_debut = $stmt->fetchColumn();
 
-            // Déterminer la plage parallèle
             $correspondances = [
                 '08:00:00' => '10:00:00',
                 '10:00:00' => '08:00:00',
@@ -35,12 +34,11 @@ class SeancesModel {
             $stmt2 = $this->pdo->prepare("SELECT id FROM plage_horaire WHERE heure_debut = :heure");
             $stmt2->execute([':heure' => $correspondances[$heure_debut]]);
             $id_plage_parallele = $stmt2->fetchColumn();
-
             if (!$id_plage_parallele) {
                 throw new Exception("Impossible de trouver la plage parallèle.");
             }
 
-            // Vérification que les deux plages n'ont pas plus de 2 séances non annulées
+            // Vérification : aucune des deux plages ne doit avoir plus de 2 séances non annulées
             foreach ([$id_plage, $id_plage_parallele] as $plage) {
                 $check = $this->pdo->prepare("
                     SELECT COUNT(*) FROM seances_cours sc
@@ -58,7 +56,33 @@ class SeancesModel {
                 ]);
                 if ($check->fetchColumn() >= 2) {
                     $this->pdo->rollBack();
-                    error_log("Création refusée : plage $plage saturée (hors séances annulées).");
+                    error_log("Création refusée : plage $plage saturée.");
+                    return false;
+                }
+            }
+
+            // Vérification : le prof ne doit pas enseigner dans une des deux plages à la même date
+            foreach ([$id_plage, $id_plage_parallele] as $plage) {
+                $verifProf = $this->pdo->prepare("
+                    SELECT 1 FROM seances_cours sc
+                    WHERE sc.date = :date
+                    AND sc.id_plage = :id_plage
+                    AND sc.id_prof = :id_prof
+                    AND NOT EXISTS (
+                        SELECT 1 FROM historique_seances hs
+                        WHERE hs.id_seances = sc.id_seances
+                        AND hs.statut = 'annule'
+                    )
+                    LIMIT 1
+                ");
+                $verifProf->execute([
+                    ':date' => $date,
+                    ':id_plage' => $plage,
+                    ':id_prof' => $id_prof
+                ]);
+                if ($verifProf->fetch()) {
+                    $this->pdo->rollBack();
+                    error_log("Création refusée : le professeur enseigne déjà dans la plage $plage à cette date.");
                     return false;
                 }
             }
@@ -160,7 +184,7 @@ class SeancesModel {
             $ancienne_date = $current['date'];
             $ancien_cours = $current['id_cours'];
 
-            // Vérifier saturation de la plage principale (hors séance elle-même et non annulée)
+            // Vérifier saturation de la plage principale
             $stmtCheck = $this->pdo->prepare("
                 SELECT COUNT(*) FROM seances_cours sc
                 WHERE sc.date = :date AND sc.id_plage = :id_plage AND sc.id_seances != :id
@@ -211,7 +235,7 @@ class SeancesModel {
                 $id_plage_p = $stmtP->fetchColumn();
 
                 if ($id_plage_p) {
-                    // Rechercher la séance parallèle avec l'**ancienne date et ancien cours**
+                    // Rechercher la séance parallèle avec l'ancienne date et ancien cours
                     $stmtFind = $this->pdo->prepare("
                         SELECT sc2.id_seances FROM seances_cours sc2
                         WHERE sc2.date = :old_date
@@ -231,7 +255,7 @@ class SeancesModel {
                     $id_parallele = $stmtFind->fetchColumn();
 
                     if ($id_parallele) {
-                        // Vérifier saturation de la plage parallèle à la nouvelle date
+                        // Vérifier saturation de la plage parallèle
                         $stmtCheck2 = $this->pdo->prepare("
                             SELECT COUNT(*) FROM seances_cours sc
                             WHERE sc.date = :new_date AND sc.id_plage = :id_plage
@@ -251,7 +275,31 @@ class SeancesModel {
                             throw new Exception("Plage parallèle saturée.");
                         }
 
-                        // Mise à jour séance parallèle avec la **nouvelle date et info**
+                        // Vérifier si le prof a déjà une séance dans la plage parallèle ce jour-là
+                        $stmtVerifProf = $this->pdo->prepare("
+                            SELECT 1 FROM seances_cours sc
+                            WHERE sc.date = :date
+                            AND sc.id_plage = :id_plage
+                            AND sc.id_prof = :id_prof
+                            AND sc.id_seances != :id
+                            AND NOT EXISTS (
+                                SELECT 1 FROM historique_seances hs
+                                WHERE hs.id_seances = sc.id_seances AND hs.statut = 'annule'
+                            )
+                            LIMIT 1
+                        ");
+                        $stmtVerifProf->execute([
+                            ':date' => $date,
+                            ':id_plage' => $id_plage_p,
+                            ':id_prof' => $id_prof,
+                            ':id' => $id_parallele
+                        ]);
+                        if ($stmtVerifProf->fetch()) {
+                            $this->pdo->rollBack();
+                            throw new Exception("Le professeur enseigne déjà dans la plage parallèle.");
+                        }
+
+                        // Mise à jour séance parallèle
                         $this->pdo->prepare("
                             UPDATE seances_cours
                             SET id_cours = :id_cours, date = :date, id_prof = :id_prof
@@ -280,7 +328,6 @@ class SeancesModel {
             throw $e;
         }
     }
-
 
     public function delete($id) {
         try {
