@@ -6,6 +6,8 @@ use app\controllers\Controller;
 use app\controllers\EnregistrementController;
 use app\controllers\CrudController;
 
+use app\controllers\SalaireController;
+
 //importation lié flight
 use flight\Engine;
 use flight\net\Router;
@@ -36,5 +38,8 @@ $router->get('/', [ $Controller, 'acceuil' ]);
 // 	$router->get('/users/@id:[0-9]', [ $Api_Example_Controller, 'getUser' ]);
 // 	$router->post('/users/@id:[0-9]', [ $Api_Example_Controller, 'updateUser' ]);
 // });
+
+$salaireController = new SalaireController();
+$router->get('/salaire', [$salaireController, 'listPersonnel']);
 
 ?>

@@ -1,6 +1,8 @@
 -- Type ENUM
 CREATE TYPE etat AS ENUM ('neuve', 'usee', 'abimee');
 
+CREATE TYPE motif AS ENUM ('Salaire', 'Assurance');
+
 -- Tables principales
 CREATE TABLE genre (
   id_genre SERIAL PRIMARY KEY,
@@ -160,4 +162,13 @@ CREATE TABLE abonnement (
   jour INTEGER,
   mois INTEGER,
   actif BOOLEAN
+);
+
+CREATE TABLE paiement_salaire(
+  id_paiement SERIAL PRIMARY KEY,
+  id_personnel INT,
+  type_personnel ENUM('Prof', 'Superviseur'),
+  montant FLOAT,
+  mois_paye DATE, 
+  date_paiement TIMESTAMP
 );
