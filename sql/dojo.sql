@@ -121,7 +121,8 @@ CREATE TABLE club_groupe (
   id SERIAL PRIMARY KEY,
   nom_responsable VARCHAR,
   contact VARCHAR,
-  nombre INTEGER
+  nombre INTEGER,
+  discipline VARCHAR
 );
 
 CREATE TABLE reservation (
@@ -167,4 +168,11 @@ CREATE TABLE status (
   id_status SERIAL PRIMARY KEY,
   id_reservation INTEGER REFERENCES reservation(id_reservation),
   valeur valeur
+)
+
+CREATE TABLE horaire (
+  id_horaire SERIAL PRIMARY KEY,
+  jour VARCHAR,
+  debut TIME,
+  fin TIME
 )

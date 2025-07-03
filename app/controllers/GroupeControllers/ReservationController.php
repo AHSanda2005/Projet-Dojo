@@ -95,4 +95,5 @@ class ReservationController {
 
     Flight::render('GroupeViews/reservation_list', ['message' => $message]);
 }
+
 }

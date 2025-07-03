@@ -23,7 +23,7 @@ class GroupeController {
 
     public function InsertGroupe() {
         $data = Flight::request()->data;
-        $message = $this->model->insert($data->nom_responsable, $data->contact, $data->nombre);
+        $message = $this->model->insert($data->nom_responsable, $data->contact, $data->nombre, $data->discipline);
 
         Flight::render('GroupeViews/InsertGroupe', [
             'message' => $message
