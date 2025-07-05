@@ -10,13 +10,14 @@
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-2xl font-bold mb-6">Paiement écolage pour <?= htmlspecialchars($eleve['prenom'] . ' ' . $eleve['nom']) ?></h1>
         
-        <form action="/Projet-Dojo/payer" method="post" class="max-w-md">
+        <form  method="post" action="/payer" class="max-w-md">
+        <!-- <form action="payer" method="post" class="max-w-md"> -->
             <input type="hidden" name="id_eleve" value="<?= $eleve['id_eleve'] ?>">
             
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2">Montant</label>
                 <input type="number" name="montant" required 
-                       class="w-full px-3 py-2 border rounded" value="<?=$tarif ?>">
+                       class="w-full px-3 py-2 border rounded" value="<?=$montant ?>">
             </div>
             
             <div class="grid grid-cols-2 gap-4 mb-4">
@@ -24,7 +25,7 @@
                     <label class="block text-gray-700 mb-2">Mois</label>
                     <select name="mois" required class="w-full px-3 py-2 border rounded">
                         <?php for ($i = 1; $i <= 12; $i++): ?>
-                            <option value="<?= $i ?>" <?= $i == date('n') ? 'selected' : '' ?>>
+                            <option value="<?= $i ?>" <?= isset($mois) && $i == $mois ? 'selected' : '' ?>>
                                 <?= DateTime::createFromFormat('!m', $i)->format('F') ?>
                             </option>
                         <?php endfor; ?>
@@ -35,13 +36,14 @@
                     <label class="block text-gray-700 mb-2">Année</label>
                     <select name="annee" required class="w-full px-3 py-2 border rounded">
                         <?php for ($i = date('Y') - 1; $i <= date('Y') + 1; $i++): ?>
-                            <option value="<?= $i ?>" <?= $i == date('Y') ? 'selected' : '' ?>>
+                            <option value="<?= $i ?>" <?= isset($annee) && $i == $annee ? 'selected' : '' ?>>
                                 <?= $i ?>
                             </option>
                         <?php endfor; ?>
                     </select>
                 </div>
             </div>
+
             
             <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
                 Enregistrer le paiement

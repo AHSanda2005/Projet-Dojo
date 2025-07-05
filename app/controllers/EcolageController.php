@@ -65,16 +65,33 @@ class EcolageController {
         $model = new \app\models\EcolageModel(Flight::db());
         $eleve = $model->find($id_eleve);
         // $isAdult = true; // a recuperer selon age 
-        $isAdult = false; // a recuperer selon age 
+        $isAdult = true; // a recuperer selon age 
         $tarif = $model->getTarif($isAdult);
-        Flight::render('eleve/paiement', ['eleve' => $eleve, 'tarif' => $tarif]);
+
+        // 4. Calcul du mois/année à payer
+        $prochain = $model->getProchainMoisA_Payer($id_eleve);
+        $mois = $prochain['mois'];
+        $annee = $prochain['annee'];
+        // 5. Calcul du montant restant à payer pour ce mois/année
+        $montant = $model->resteEcolageApayer($id_eleve, $mois, $annee, $tarif);
+        // 6. Envoi à la vue
+        Flight::render('eleve/paiement', [
+            'eleve' => $eleve,
+            'tarif' => $tarif,
+            'mois' => $mois,
+            'annee' => $annee,
+            'montant' => $montant
+        ]);
+        // Flight::render('eleve/paiement', ['eleve' => $eleve, 'tarif' => $tarif]);
     }
+
     
     public function paiementEcolage() {
         $data = Flight::request()->data->getData();
     
         $ecolageModel = new \app\models\EcolageModel(Flight::db());
         $success = $ecolageModel->create($data);
+        // Flight::redirect('eleve/paiement');
         Flight::redirect('eleve/paiement/'.$data['id_eleve']);
     }
 
@@ -87,6 +104,9 @@ class EcolageController {
             'id_eleve' => $id_eleve
         ]);
     }
+
+
+    
     
 }
 

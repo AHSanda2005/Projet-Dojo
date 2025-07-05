@@ -29,8 +29,8 @@ $router->get('/', [ $Controller, 'acceuil' ]);
 
 $ecolageController = new EcolageController();
 
-$router->get('/ecolage/paiement/@id_eleve', [$ecolageController, 'paiementEcolageForm']);
-Flight::route('POST /ecolage/paiement', [$ecolageController, 'paiementEcolage']);
+Flight::route('GET /ecolage/paiement/@id_eleve', [$ecolageController, 'paiementEcolageForm']);
+Flight::route('POST /payer', [$ecolageController, 'paiementEcolage']);
 $router->get('/ecolage/liste_paiement/@id_eleve', [$ecolageController, 'afficherPaiements']);
 
 
