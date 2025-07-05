@@ -10,7 +10,7 @@
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-2xl font-bold mb-6">Paiement écolage pour <?= htmlspecialchars($eleve['prenom'] . ' ' . $eleve['nom']) ?></h1>
         
-        <form  method="post" action="/payer" class="max-w-md">
+        <form  method="post" action="/Projet-Dojo/payer" class="max-w-md">
         <!-- <form action="payer" method="post" class="max-w-md"> -->
             <input type="hidden" name="id_eleve" value="<?= $eleve['id_eleve'] ?>">
             
