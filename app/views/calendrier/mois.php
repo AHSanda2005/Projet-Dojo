@@ -1,10 +1,3 @@
-<?php
-function estMercrediOuSamedi($jour, $mois, $annee) {
-    $date = DateTime::createFromFormat('Y-n-j', "$annee-$mois-$jour");
-    $jourSemaine = $date->format('N'); // 1 = lundi, ..., 7 = dimanche
-    return in_array($jourSemaine, [3, 6]); // 3 = mercredi, 6 = samedi
-}
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -31,12 +24,23 @@ function estMercrediOuSamedi($jour, $mois, $annee) {
             font-weight: bold;
         }
 
-        .seance {
+        .seance, .reservation, .abonnement {
             font-size: 0.85rem;
             margin-bottom: 8px;
             padding: 4px;
-            background-color: #e2e6ea;
             border-radius: 4px;
+        }
+
+        .seance {
+            background-color: #e2e6ea;
+        }
+
+        .reservation {
+            background-color: #fff3cd;
+        }
+
+        .abonnement {
+            background-color: #d4edda;
         }
 
         .details-link {
@@ -46,7 +50,7 @@ function estMercrediOuSamedi($jour, $mois, $annee) {
 </head>
 <body>
 <div class="container mt-4">
-    <h2>Calendrier de <?= $mois ?>/<?= $annee ?> (Mercredi & Samedi uniquement)</h2>
+    <h2>Calendrier complet de <?= $mois ?>/<?= $annee ?></h2>
 
     <div class="mb-3">
         <a class="btn btn-secondary" href="?mois=<?= ($mois == 1 ? 12 : $mois - 1) ?>&annee=<?= ($mois == 1 ? $annee - 1 : $annee) ?>">← Mois précédent</a>
@@ -55,25 +59,38 @@ function estMercrediOuSamedi($jour, $mois, $annee) {
 
     <div class="calendar">
         <?php for ($i = 1; $i <= 31; $i++): ?>
-            <?php if (checkdate($mois, $i, $annee) && estMercrediOuSamedi($i, $mois, $annee)): ?>
-                <div class="day">
-                    <h6><?= $i ?>/<?= $mois ?></h6>
+            <?php if (!checkdate($mois, $i, $annee)) continue; ?>
+            <div class="day">
+                <h6><?= $i ?>/<?= $mois ?></h6>
 
-                    <?php if (isset($calendrier[$i])): ?>
-                        <?php foreach ($calendrier[$i] as $s): ?>
-                            <div class="seance">
-                                <?= htmlspecialchars($s['heure_debut']) ?> - <?= htmlspecialchars($s['heure_fin']) ?><br>
-                                Groupe <?= htmlspecialchars($s['groupe']) ?><br>
-                                <?= htmlspecialchars($s['cours']) ?><br>
-                                Prof : <?= htmlspecialchars($s['prof_nom']) ?> <?= htmlspecialchars($s['prof_prenom']) ?><br>
-                                <a href="/calendrier/details?date=<?= "$annee-$mois-$i" ?>&groupe=<?= $s['groupe'] ?>" class="details-link">Détails</a>
+                <?php if (isset($calendrier[$i])): ?>
+                    <?php foreach ($calendrier[$i] as $item): ?>
+                        <?php if (isset($item['type']) && $item['type'] === 'club'): ?>
+                            <div class="club">
+                                <strong><?= ucfirst($item['type']) ?></strong><br>
+                                Club : <?= htmlspecialchars($item['club_nom'] ?? 'Inconnu') ?><br>
+                                Discipline : <?= htmlspecialchars($item['discipline'] ?? 'Non précisée') ?><br>
+                                <?php if (!empty($item['heure_debut'])): ?>
+                                    Heure : <?= htmlspecialchars($item['heure_debut']) ?> - <?= htmlspecialchars($item['heure_fin']) ?>
+                                <?php endif; ?>
                             </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <small>Aucune séance</small>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
+                        <?php else: ?>
+                            <div class="seance">
+                                <?= htmlspecialchars($item['heure_debut']) ?> - <?= htmlspecialchars($item['heure_fin']) ?><br>
+                                <?php if (isset($item['groupe'])): ?>
+                                    Groupe <?= htmlspecialchars($item['groupe']) ?><br>
+                                <?php endif; ?>
+                                <?= htmlspecialchars($item['cours']) ?><br>
+                                Prof : <?= htmlspecialchars($item['prof_nom']) ?> <?= htmlspecialchars($item['prof_prenom']) ?><br>
+                                <a href="/calendrier/details?date=<?= "$annee-$mois-$i" ?>&groupe=<?= $item['groupe'] ?? 0 ?>" class="details-link">Détails</a>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+
+                <?php else: ?>
+                    <small>Aucune activité</small>
+                <?php endif; ?>
+            </div>
         <?php endfor; ?>
     </div>
 </div>

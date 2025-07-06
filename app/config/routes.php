@@ -47,7 +47,7 @@ $router->get('/listeSeances', [$seancesController, 'getAllSeances']);
 $router->get('/historiqueSeances', [$seancesController, 'historiqueSeances']);
 
 // EDT
-$router->get('/calendrier', [$calendrierController, 'afficherMois']);
+$router->get('/calendrier', [$calendrierController, 'afficherMoisComplet']);
 $router->get('/calendrier/details', [$calendrierController, 'detailsGroupe']);
 
 ?>

@@ -4,6 +4,7 @@ namespace app\controllers\controllersCours;
 use Flight;
 use Exception;
 use app\models\modelsCours\GestionCoursModel;
+use app\models\modelsCours\ReservationModel;
 
 class CalendrierController {
 
@@ -44,7 +45,6 @@ class CalendrierController {
         ]);
     }
 
-
     public static function detailsGroupe() {
         $date = $_GET['date'] ?? null;
         $groupe = $_GET['groupe'] ?? null;
@@ -60,6 +60,65 @@ class CalendrierController {
             'date' => $date,
             'groupe' => $groupe,
             'eleves' => $eleves
+        ]);
+    }
+
+    public static function afficherClubsMois($mois, $annee) {
+        $reservationModel = new ReservationModel(Flight::db());
+        $reservations = $reservationModel->getActivitesClubs($mois, $annee); // <- cette méthode doit exister dans ReservationModel
+
+        $calendrier = [];
+
+        foreach ($reservations as $r) {
+            $jour = intval(date('j', strtotime($r['date_reserve'])));
+            $calendrier[$jour][] = array_merge($r, ['type' => 'club']);
+        }
+
+        return $calendrier;
+    }
+
+    public static function afficherMoisComplet() {
+        $mois = isset($_GET['mois']) ? intval($_GET['mois']) : date('n');
+        $annee = isset($_GET['annee']) ? intval($_GET['annee']) : date('Y');
+
+        $gestionCours = new GestionCoursModel(Flight::db());
+        $gestionCours->assignerGroupesEleves($mois, $annee);
+
+        $calendrier = [];
+
+        for ($jour = 1; $jour <= 31; $jour++) {
+            if (!checkdate($mois, $jour, $annee)) continue;
+
+            $date = sprintf('%04d-%02d-%02d', $annee, $mois, $jour);
+            $jourSemaine = date('w', strtotime($date));
+
+            if ($jourSemaine == 3 || $jourSemaine == 6) {
+                $gestionCours->planifierCoursDuJour($date);
+            }
+
+            $calendrier[$jour] = [];
+
+            $seances = $gestionCours->getSeancesParJour($date);
+            if (!empty($seances)) {
+                $calendrier[$jour] = array_merge($calendrier[$jour], $seances);
+            }
+        }
+
+        // Ajouter les réservations club
+        $reservationModel = new ReservationModel(Flight::db());
+        $reservations = $reservationModel->getActivitesClubs($mois, $annee);
+
+        foreach ($reservations as $jour => $activites) {
+            foreach ($activites as $a) {
+                $calendrier[$jour][] = array_merge($a, ['type' => 'club']);
+            }
+        }
+
+
+        Flight::render("calendrier/mois", [
+            'mois' => $mois,
+            'annee' => $annee,
+            'calendrier' => $calendrier
         ]);
     }
 }
