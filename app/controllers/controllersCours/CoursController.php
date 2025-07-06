@@ -29,11 +29,11 @@ class CoursController {
             $model->create($label);
             $cours = $model->getAll();
             $data = ['message' => 'Cours ajouté avec succès', 'cours' => $cours];
-            Flight::render("cours/liste", $data);
         } catch(Exception $e) {
-            $data = ['message' => $e->getMessage()];
-            Flight::render("cours/liste", $data);
+            $cours = $model->getAll();
+            $data = ['message' => $e->getMessage(), 'cours' => $cours];
         }
+        Flight::render("cours/liste", $data);
     }
 
     public function updateCours() {

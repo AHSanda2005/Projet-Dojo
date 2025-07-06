@@ -22,6 +22,15 @@ class CoursModel {
     }
 
     public function create($label) {
+        // Vérifier si le label existe déjà (insensible à la casse)
+        $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM cours WHERE LOWER(label) = LOWER(?)");
+        $checkStmt->execute([$label]);
+        $exists = $checkStmt->fetchColumn();
+
+        if ($exists > 0) {
+            throw new Exception("Le cours '$label' existe déjà.");
+        }
+
         $stmt = $this->db->prepare("INSERT INTO cours(label) VALUES (?)");
         return $stmt->execute([$label]);
     }
