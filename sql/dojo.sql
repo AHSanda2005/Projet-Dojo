@@ -1,5 +1,16 @@
 -- Type ENUM
 CREATE TYPE etat AS ENUM ('neuve', 'usee', 'abimee');
+CREATE TYPE paiement_statut AS ENUM ('paye', 'en_retard', 'annule'); --Mbl tsy teo
+CREATE TYPE statut AS ENUM ('cree','modifie','annule');
+CREATE TYPE statut_ecolage AS ENUM ( /* Wanda - update 29-06-25 */
+  'non paye',
+  'paye',
+  'en retard',
+  'annule',
+  'en attente'
+);
+CREATE TYPE valeur AS ENUM ('demande', 'confirme', 'payee', 'annule');
+
 
 -- Tables principales
 CREATE TABLE genre (
@@ -34,6 +45,7 @@ CREATE TABLE eleve (
   date_naissance TIMESTAMP,
   adresse VARCHAR,
   contact VARCHAR,
+  date_inscription TIMESTAMP, /* Wanda - update 29-06-25 */
   id_genre INTEGER REFERENCES genre(id_genre)
 );
 
@@ -51,20 +63,84 @@ CREATE TABLE parent_eleve (
   id_eleve INTEGER REFERENCES eleve(id_eleve)
 );
 
--- Matériel et suivi
-CREATE TABLE materiel (
-  id_materiel SERIAL,
-  reference_materiel INTEGER UNIQUE,
-  label VARCHAR,
-  PRIMARY KEY (id_materiel, reference_materiel)
+
+-- Matériel et suivi : Dylan modification (28-06-25)
+
+CREATE TABLE materiel_type (
+   id_type     SERIAL PRIMARY KEY,
+   reference   VARCHAR(50) UNIQUE NOT NULL,
+   label       VARCHAR(255) NOT NULL,
+   description TEXT
+);
+
+ALTER TABLE materiel_type
+    ADD COLUMN prix NUMERIC(10,2) DEFAULT 0; -- Dylan modification (29-06-25)
+
+
+CREATE TABLE materiel_item (
+   id_item    SERIAL PRIMARY KEY,
+   id_type    INTEGER NOT NULL
+       REFERENCES materiel_type(id_type)
+           ON DELETE CASCADE,
+   num_serie  VARCHAR(100) UNIQUE,
+   etat       etat NOT NULL DEFAULT 'neuve'
 );
 
 CREATE TABLE stock_materiel (
-  id_suivi_materiel SERIAL PRIMARY KEY,
-  id_materiel INTEGER REFERENCES materiel(id_materiel),
-  quantite INTEGER,
-  date TIMESTAMP
+    id_suivi        SERIAL PRIMARY KEY,
+    id_type         INTEGER NOT NULL
+        REFERENCES materiel_type(id_type)
+            ON DELETE RESTRICT,
+    type_mouvement  CHAR(1) NOT NULL             -- 'I' pour entrée, 'O' pour sortie
+        CHECK (type_mouvement IN ('I','O')),
+    quantite        INTEGER NOT NULL CHECK (quantite > 0),
+    date            TIMESTAMP NOT NULL DEFAULT now()
 );
+
+CREATE TYPE etat_suivi AS ENUM ('disponible','endommage');
+
+CREATE TABLE club_groupe (
+     id SERIAL PRIMARY KEY,
+     nom_responsable VARCHAR,
+     contact VARCHAR,
+     nombre INTEGER,
+    discipline VARCHAR
+);
+
+CREATE TABLE suivi_salle (
+     id_suivi_salle SERIAL PRIMARY KEY,
+    id_club integer references club_groupe(id),
+     id_superviseur   INTEGER NOT NULL
+         REFERENCES superviseur(id_superviseur)
+             ON DELETE RESTRICT,
+     id_item          INTEGER NOT NULL
+         REFERENCES materiel_item(id_item)
+             ON DELETE CASCADE,
+     date             TIMESTAMP NOT NULL DEFAULT now(),
+     description      TEXT,
+     etat             etat_suivi NOT NULL DEFAULT 'disponible'
+);
+ --Dylan modification (29-06-25)
+
+CREATE TABLE facture_materiel (
+      id_facture SERIAL PRIMARY KEY,
+      id_suivi_salle INTEGER REFERENCES suivi_salle(id_suivi_salle) UNIQUE,
+      date TIMESTAMP DEFAULT NOW(),
+      destinataire VARCHAR(255),  -- nom club ou superviseur
+      montant NUMERIC(10,2)
+);
+ALTER TABLE facture_materiel ADD COLUMN est_paye BOOLEAN DEFAULT FALSE;
+
+
+UPDATE materiel_type
+SET prix = 45000.00
+WHERE id_type = 1;
+
+INSERT INTO materiel_type (reference, label, description, prix)
+VALUES ('TAP-001', 'Tapis de sol', 'Tapis antidérapant pour arts martiaux', 35000.00);
+
+
+-- Dylan modification (28-06-25)
 
 CREATE TABLE historique_garde (
   id_historique SERIAL PRIMARY KEY,
@@ -73,12 +149,6 @@ CREATE TABLE historique_garde (
   heure TIMESTAMP
 );
 
-CREATE TABLE suivi_salle (
-  id_superviseur INTEGER REFERENCES superviseur(id_superviseur),
-  description TEXT,
-  reference_materiel INTEGER REFERENCES materiel(reference_materiel),
-  etat etat
-);
 
 -- Cours
 CREATE TABLE cours (
@@ -86,25 +156,57 @@ CREATE TABLE cours (
   label VARCHAR
 );
 
+CREATE TABLE plage_horaire (
+    id SERIAL PRIMARY KEY,
+    heure_debut TIME UNIQUE,
+    heure_fin TIME UNIQUE
+);
+
+INSERT INTO plage_horaire (heure_debut, heure_fin) VALUES
+    ('08:00', '10:00'),
+    ('10:00', '12:00'),
+    ('13:00', '15:00'),
+    ('15:00', '17:00');
+
+CREATE TABLE maximum (
+     nombre_eleve_cours INTEGER,
+     nombre_eleve INTEGER
+);
+
+-- Clubs
+
+
 CREATE TABLE seances_cours (
-  id_seances SERIAL PRIMARY KEY,
-  id_cours INTEGER REFERENCES cours(id_cours),
-  date DATE,
-  heure_debut TIME,
-  heure_fin TIME
+   id_seances SERIAL PRIMARY KEY,
+   id_cours INTEGER REFERENCES cours(id_cours),
+   date DATE,
+   id_plage INTEGER REFERENCES plage_horaire(id),
+   id_prof INTEGER REFERENCES prof(id_prof)
 );
 
 CREATE TABLE historique_seances (
   id_historique SERIAL PRIMARY KEY,
   id_seances INTEGER REFERENCES seances_cours(id_seances),
-  date DATE
+  date DATE,
+  statut statut
 );
 
-CREATE TABLE evolution (
-  id_prof INTEGER REFERENCES prof(id_prof),
-  id_eleve INTEGER REFERENCES eleve(id_eleve),
-  avis TEXT
+-- CREATE TYPE valeur AS ENUM ('demande', 'confirme', 'payee', 'annule');
+CREATE TABLE reservation (
+     id_reservation SERIAL PRIMARY KEY,
+     id_club INTEGER REFERENCES club_groupe(id),
+     date_reservation TIMESTAMP DEFAULT NOW(),
+     date_reserve DATE,
+     heure_debut TIME,
+     heure_fin TIME,
+     valeur valeur DEFAULT 'demande'
 );
+
+-- CREATE TABLE status (
+--     id_status SERIAL PRIMARY KEY,
+--     id_reservation INTEGER REFERENCES reservation(id_reservation),
+--     valeur valeur
+-- );
 
 CREATE TABLE ecolage (
   id_ecolage SERIAL PRIMARY KEY,
@@ -112,29 +214,25 @@ CREATE TABLE ecolage (
   montant FLOAT,
   date_paiement TIMESTAMP,
   mois INTEGER,
-  annee INTEGER
+  annee INTEGER,
+  statut statut_ecolage DEFAULT 'non paye' /* Wanda - update 29-06-25 */
 );
 
--- Clubs
-CREATE TABLE club_groupe (
-  id SERIAL PRIMARY KEY,
-  nom_responsable VARCHAR,
-  contact VARCHAR,
-  nombre INTEGER
-);
 
-CREATE TABLE reservation (
-  id_reservation SERIAL PRIMARY KEY,
-  id_club INTEGER REFERENCES club_groupe(id),
-  date_reservation TIMESTAMP,
-  date_reserve TIMESTAMP,
-  heure_debut TIME,
-  heure_fin TIME
-);
+-- Corriger la table reservation
+-- DROP TABLE IF EXISTS reservation CASCADE;
+
+
+-- CREATE TABLE paiement (
+--   id_payement SERIAL PRIMARY KEY, -- Jhoanito id_paiement
+--   id_groupe INTEGER REFERENCES club_groupe(id),
+--   montant FLOAT,
+--   date_paiement TIMESTAMP
+-- );
 
 CREATE TABLE paiement (
   id_payement SERIAL PRIMARY KEY,
-  id_groupe INTEGER REFERENCES club_groupe(id),
+  id_reservation INTEGER REFERENCES reservation(id_reservation), /* Wanda - update 29-06-25 */
   montant FLOAT,
   date_paiement TIMESTAMP
 );
@@ -150,14 +248,76 @@ CREATE TABLE tarif_club (
   montant_par_heure FLOAT
 );
 
-CREATE TABLE tarif_abonnement (
-  montant FLOAT
-);
-
 CREATE TABLE abonnement (
   id_abonnement SERIAL PRIMARY KEY,
   id_club INTEGER REFERENCES club_groupe(id),
   jour INTEGER,
   mois INTEGER,
+  annee INTEGER,
   actif BOOLEAN
 );
+-- ALTER table abonnement ADD COLUMN annee INTEGER; -- 03/07/25 modif Jhoanito
+
+-- modif Jhoanito
+CREATE TABLE evolution (
+  id_prof INTEGER REFERENCES prof(id_prof) ON DELETE RESTRICT,
+  id_eleve INTEGER REFERENCES eleve(id_eleve) ON DELETE CASCADE,
+  avis TEXT,
+  PRIMARY KEY (id_prof, id_eleve) -- Clé primaire composite
+);
+
+CREATE TABLE tarif_abonnement (
+  id_tarif SERIAL PRIMARY KEY, -- Ajout d'une clé primaire
+  montant NUMERIC(10,2) NOT NULL
+);
+
+
+CREATE TABLE presence (
+      id_presence SERIAL PRIMARY KEY,
+      id_eleve INTEGER REFERENCES eleve(id_eleve),
+      id_seances INTEGER REFERENCES seances_cours(id_seances),
+      present BOOLEAN,
+      date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      remarque TEXT DEFAULT NULL
+);
+
+CREATE TABLE status (
+    id_status SERIAL PRIMARY KEY,
+    id_reservation INTEGER REFERENCES reservation(id_reservation),
+    valeur valeur
+);
+
+CREATE TABLE horaire (
+     id_horaire SERIAL PRIMARY KEY,
+     jour VARCHAR,
+     debut TIME,
+     fin TIME
+);
+
+-- Index pour optimiser les requêtes de reporting
+CREATE INDEX idx_ecolage_date_paiement ON ecolage(date_paiement);
+CREATE INDEX idx_ecolage_mois_annee ON ecolage(mois, annee);
+CREATE INDEX idx_abonnement_mois_annee ON abonnement(mois, annee);
+CREATE INDEX idx_abonnement_actif ON abonnement(actif);
+CREATE INDEX idx_seances_cours_date ON seances_cours(date);
+CREATE INDEX idx_seances_cours_id_cours ON seances_cours(id_cours);
+CREATE INDEX idx_historique_seances_id_seances ON historique_seances(id_seances);
+
+-- Créer la table gestion_groupe
+CREATE TABLE gestion_groupe (
+    id SERIAL PRIMARY KEY,
+    id_eleve INTEGER REFERENCES eleve(id_eleve),
+    mois INTEGER,
+    annee INTEGER,
+    groupe INTEGER,
+    UNIQUE (id_eleve, mois, annee)
+);
+
+-- Créer la table planification_cours
+CREATE TABLE planification_cours (
+    id SERIAL PRIMARY KEY,
+    id_seance INTEGER REFERENCES seances_cours(id_seances),
+    groupe INTEGER,
+    UNIQUE (id_seance, groupe)
+);
+
